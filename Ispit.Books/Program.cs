@@ -37,6 +37,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Added Admin route
+app.MapControllerRoute(
+    name: "Admin",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
