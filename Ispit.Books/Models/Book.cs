@@ -23,7 +23,7 @@ namespace Ispit.Books.Models
         
 
         [Required]
-        [ForeignKey("AuthordId")]
+        [ForeignKey("AuthorId")]
         public Author Author { get; set; }
         public int AuthorId { get; set; }
 
