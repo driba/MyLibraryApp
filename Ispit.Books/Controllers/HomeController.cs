@@ -23,6 +23,12 @@ namespace Ispit.Books.Controllers
             return View();
         }
 
+        // GET: home/Library
+        public IActionResult Library()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
