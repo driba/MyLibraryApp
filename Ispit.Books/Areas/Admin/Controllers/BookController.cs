@@ -23,28 +23,31 @@ namespace Ispit.Books.Areas.Admin.Controllers
         }
 
         // GET: Admin/Book
-        public IActionResult Index(string? msg, string? msg_type)
+        public IActionResult Index(string? msg)
         {
-            ViewBag.msg_type = msg_type;
-            ViewBag.msg = msg;
+            ViewBag.Msg = msg;
 
-            var books = _context.Books.ToList();
+            var books = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.User)
+                .ToList();
             return View(books);
         }
 
         // GET: Admin/Book/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null || _context.Books == null)
             {
                 return NotFound();
             }
 
-            var book = await _context.Books
+            var book = _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
                 .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.BookId == id);
+                .FirstOrDefault(m => m.BookId == id);
             if (book == null)
             {
                 return NotFound();
@@ -54,101 +57,109 @@ namespace Ispit.Books.Areas.Admin.Controllers
         }
 
         // GET: Admin/Book/Create
-        public IActionResult Create()
+        public IActionResult Create(string? msg)
         {
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "PenName");
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "PublisherId", "Title");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
+            ViewBag.Msg = msg;
+
+            ViewBag.Users = _context.Users.ToList();
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Publishers = _context.Publishers.ToList();
+            
             return View();
         }
 
         // POST: Admin/Book/Create        
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("BookId,Title,Description,UserId,AuthorId,PublisherId")] Book book)
-        {
-            if (ModelState.IsValid)
+        public IActionResult Create(Book book)
+        {            
+            var author = _context.Authors.FirstOrDefault(a => a.AuthorId == book.AuthorId);
+            var publisher = _context.Publishers.FirstOrDefault(p => p.PublisherId == book.PublisherId);
+            if (author == null || publisher == null)
+            {
+                return Create("Došlo je do greške! Ponovite upis...");
+            }
+
+            book.User = _context.Users.FirstOrDefault(u => u.Id == book.UserId);
+            book.Author = author;
+            book.Publisher = publisher;
+
+
+            if (_context.Books.Find(book.BookId) == null)
             {
                 _context.Add(book);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                _context.SaveChanges();
+                return RedirectToAction(nameof(Index), new { msg = "Zapis uspješno kreiran!" });
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "PenName", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "PublisherId", "Title", book.PublisherId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", book.UserId);
+
+            
+
             return View(book);
         }
 
         // GET: Admin/Book/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id, string? msg)
         {
             if (id == null || _context.Books == null)
             {
                 return NotFound();
             }
 
-            var book = await _context.Books.FindAsync(id);
+            var book = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher)
+                .Include(b => b.User)
+                .FirstOrDefault(m => m.BookId == id);
             if (book == null)
             {
                 return NotFound();
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "PenName", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "PublisherId", "Title", book.PublisherId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", book.UserId);
+
+            ViewBag.Users = _context.Users.ToList();
+            ViewBag.Authors = _context.Authors.ToList();
+            ViewBag.Publishers = _context.Publishers.ToList();
             return View(book);
         }
 
         // POST: Admin/Book/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("BookId,Title,Description,UserId,AuthorId,PublisherId")] Book book)
+        public IActionResult Edit(int id, Book book)
         {
             if (id != book.BookId)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            book.User = _context.Users.FirstOrDefault(u => u.Id == book.UserId);
+
+            var author = _context.Authors.FirstOrDefault(a => a.AuthorId == book.AuthorId);
+            var publisher = _context.Publishers.FirstOrDefault(p => p.PublisherId == book.PublisherId);
+            if (author == null || publisher == null)
             {
-                try
-                {
-                    _context.Update(book);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookExists(book.BookId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                return View(book);
             }
-            ViewData["AuthorId"] = new SelectList(_context.Authors, "AuthorId", "PenName", book.AuthorId);
-            ViewData["PublisherId"] = new SelectList(_context.Publishers, "PublisherId", "Title", book.PublisherId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", book.UserId);
-            return View(book);
+           
+            _context.Update(book);
+            _context.SaveChanges();
+                   
+            return RedirectToAction(nameof(Index), new { msg = "Ažuriranje uspješno!"});
+        
         }
 
         // GET: Admin/Book/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null || _context.Books == null)
             {
                 return NotFound();
             }
 
-            var book = await _context.Books
+            var book = _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
                 .Include(b => b.User)
-                .FirstOrDefaultAsync(m => m.BookId == id);
+                .FirstOrDefault(m => m.BookId == id);
             if (book == null)
             {
                 return NotFound();
@@ -160,20 +171,17 @@ namespace Ispit.Books.Areas.Admin.Controllers
         // POST: Admin/Book/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            if (_context.Books == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Books'  is null.");
-            }
-            var book = await _context.Books.FindAsync(id);
+            
+            var book = _context.Books.Find(id);
             if (book != null)
             {
                 _context.Books.Remove(book);
             }
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            _context.SaveChanges();
+            return RedirectToAction(nameof(Index), new { msg = "Zapis izbrisan!"});
         }
 
         private bool BookExists(int id)

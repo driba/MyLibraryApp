@@ -4,20 +4,8 @@
     ViewData["Title"] = "Index";
 }
 
-@if (ViewBag.Msg != null)
-{
-    <div class="alert alert-info">
-        @ViewBag.Msg
-    </div>
-}
-
-<h1>Book list</h1>
+<h1>Admins book list</h1>
 <hr />
-<div class="row mb-3">
-    <div class="col">
-        <a class="btn btn-primary" asp-action="Create">Add new book</a>        
-    </div>
-</div>
 
 <table class="table">
     <thead>
@@ -58,11 +46,10 @@
             <td>
                 @Html.DisplayFor(modelItem => item.User.UserName)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.BookId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.BookId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.BookId">Delete</a>
-            </td>
+            <td></td>
+            @*
+                TODO : Napraviti linkove za CRUD ove liste knjiga i dodati link za novu knjigu
+            *@      
         </tr>
 }
     </tbody>

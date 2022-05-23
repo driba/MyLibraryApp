@@ -1,4 +1,5 @@
-﻿@model Ispit.Books.Models.Book
+﻿@using Microsoft.AspNetCore.Identity
+@model Ispit.Books.Models.Book
 
 @{
     ViewData["Title"] = "Edit";
@@ -23,21 +24,64 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
-                <span asp-validation-for="UserId" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label for="AuthorSelect">Author</label>
+                <select name="AuthorId" class="form-control form-select" id="AuthorSelect">
+                
+                    @foreach(var item in ViewBag.Authors)
+                    {                        
+                        if (item.AuthorId == Model.AuthorId)
+                        { 
+                            <option value="@item.AuthorId"  selected>@item.PenName</option> 
+                        }
+                        else
+                        {
+                            <option value="@item.AuthorId">@item.PenName</option>                            
+                        }
+                        
+                    }
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="AuthorId" class="control-label"></label>
-                <select asp-for="AuthorId" class="form-control" asp-items="ViewBag.AuthorId"></select>
-                <span asp-validation-for="AuthorId" class="text-danger"></span>
+
+            <div class="col mb-3">
+                <label for="PublisherSelect">Publisher</label>
+                <select name="PublisherId" class="form-control form-select" id="PublisherSelect">                    
+                
+                    @foreach(var item in ViewBag.Publishers)
+                    {
+                        if (item.PublisherId == Model.PublisherId)
+                        { 
+                            <option value="@item.PublisherId"  selected>@item.Title</option> 
+                        }
+                        else
+                        {
+                            <option value="@item.PublisherId">@item.Title</option>                            
+                        }
+                    }
+                </select>
             </div>
-            <div class="form-group">
-                <label asp-for="PublisherId" class="control-label"></label>
-                <select asp-for="PublisherId" class="form-control" asp-items="ViewBag.PublisherId"></select>
-                <span asp-validation-for="PublisherId" class="text-danger"></span>
+
+            <div class="col mb-3">
+                 <label for="UserSelect">User</label>
+                <select name="UserId" class="form-control form-select" id="UserSelect">
+                    <option value="">Select user</option>
+                
+                    @foreach(var item in ViewBag.Users as List<IdentityUser>)
+                    {
+                        if (item.Id == Model.UserId)
+                        { 
+                            <option value="@item.Id"  selected>@item.UserName</option> 
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.UserName</option>                            
+                        }
+                        
+                    }
+                </select>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
