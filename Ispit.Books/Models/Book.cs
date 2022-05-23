@@ -16,10 +16,10 @@ namespace Ispit.Books.Models
         [StringLength(3000)]
         public string? Description { get; set; }
 
-        [Required]
+        
         [ForeignKey("UserId")]
-        public IdentityUser User { get; set; }
-        public string UserId { get; set; }
+        public IdentityUser? User { get; set; }
+        public string? UserId { get; set; }
         
 
         [Required]
