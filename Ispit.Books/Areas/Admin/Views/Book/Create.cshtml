@@ -53,8 +53,7 @@
 
             <div class="col mb-3">
                  <label for="UserSelect">User</label>
-                <select name="UserId" class="form-control form-select" id="UserSelect">
-                    <option value="">Select user</option>
+                <select name="UserId" class="form-control form-select" id="UserSelect">                    
                 
                     @foreach(var item in ViewBag.Users as List<IdentityUser>)
                     {

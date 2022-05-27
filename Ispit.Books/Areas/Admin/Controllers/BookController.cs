@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Ispit.Books.Data;
 using Ispit.Books.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Ispit.Books.Areas.Admin.Controllers
 {
@@ -19,7 +20,7 @@ namespace Ispit.Books.Areas.Admin.Controllers
 
         public BookController(ApplicationDbContext context)
         {
-            _context = context;
+            _context = context;            
         }
 
         // GET: Admin/Book
@@ -72,15 +73,21 @@ namespace Ispit.Books.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Book book)
-        {            
+        {
             var author = _context.Authors.FirstOrDefault(a => a.AuthorId == book.AuthorId);
             var publisher = _context.Publishers.FirstOrDefault(p => p.PublisherId == book.PublisherId);
             if (author == null || publisher == null)
             {
                 return Create("Došlo je do greške! Ponovite upis...");
+            }            
+
+            var user = _context.Users.FirstOrDefault(u => u.Id == book.UserId);
+            if (user == null)
+            {
+                return Create("Polje korisnika je obavezno! Izaberite iz padajuceg izbornika");
             }
 
-            book.User = _context.Users.FirstOrDefault(u => u.Id == book.UserId);
+            book.User = user;
             book.Author = author;
             book.Publisher = publisher;
 
@@ -94,7 +101,7 @@ namespace Ispit.Books.Areas.Admin.Controllers
 
             
 
-            return View(book);
+            return Create("Došlo je do greške. Ponovite upis!");
         }
 
         // GET: Admin/Book/Edit/5

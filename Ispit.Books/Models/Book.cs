@@ -18,8 +18,8 @@ namespace Ispit.Books.Models
 
         
         [ForeignKey("UserId")]
-        public IdentityUser? User { get; set; }
-        public string? UserId { get; set; }
+        public IdentityUser User { get; set; }
+        public string UserId { get; set; }
         
 
         [Required]
